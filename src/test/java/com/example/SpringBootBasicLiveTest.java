@@ -46,7 +46,7 @@ public class SpringBootBasicLiveTest {
         final Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(book)
-                .post(API_ROOT);
+                .post(API_ROOT+"/createBook");
         return API_ROOT + "/" + response.jsonPath()
                 .get("id");
     }
