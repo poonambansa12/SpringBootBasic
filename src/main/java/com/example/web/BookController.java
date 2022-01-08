@@ -7,6 +7,7 @@ import com.example.web.exception.BookNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -29,14 +31,24 @@ public class BookController {
     @PostMapping(value = "/createBook", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Book create(@RequestBody Book book) {
-        return bookRepository.save(book);
+    public ResponseEntity<Book> create(@RequestBody Book book) {
+
+        try {
+            return new ResponseEntity<>(bookRepository.save(book), HttpStatus.CREATED);
+        } catch(Exception e) {
+            if(book == null || book.getTitle() == null || book.getAuthor() == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 
     @GetMapping("/{id}")
-    public Book findById(@PathVariable Long id) {
-        return bookRepository.findById(id)
-                .orElseThrow(BookNotFoundException::new);
+    public ResponseEntity<Book> findById(@PathVariable Long id) {
+        final Optional<Book> bookOptional = bookRepository.findById(id);
+        return bookOptional.map(book -> new ResponseEntity<>(book, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/title/{title}")
