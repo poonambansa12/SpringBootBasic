@@ -6,6 +6,7 @@ import com.example.web.exception.BookIdMismatchException;
 import com.example.web.exception.BookNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +26,8 @@ public class BookController {
     @Autowired
     private BookRepository bookRepository;
 
-    @PostMapping("/createBook")
+    @PostMapping(value = "/createBook", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Book create(@RequestBody Book book) {
         return bookRepository.save(book);
@@ -54,7 +56,7 @@ public class BookController {
         bookRepository.deleteById(id);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public Book updateBook(@RequestBody Book book, @PathVariable Long id) {
         if(book.getId() != id) {
             throw new BookIdMismatchException();
